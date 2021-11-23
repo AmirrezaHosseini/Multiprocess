@@ -7,14 +7,14 @@
 #include <fcntl.h>
 #define BUFF 1000
 
-#define FINDER "./OS_Finder"
-#define PLACER "./OS_Placer"
-#define DECODER "./OS_Decoder"
+#define FINDER "./finder"
+#define PLACER "./Placer"
+#define DECODER "./Decoder"
 
 int main(){
 
 
-    FILE *f = fopen("input.txt", "r");
+    FILE *f = fopen("inputCode.txt", "r");
 	if(f == NULL){
 		printf("no such a file");
 		return 0;
@@ -63,27 +63,31 @@ int main(){
 		execvp(args[0], args);
 	}
 
-    int fd;
+    int fl;
 	char *MainToDecoder = "MainToDecoder";
+
 	mkfifo(MainToDecoder, 0666);
-	fd = open(MainToDecoder, O_WRONLY);
-	write(fd, decoder_text, di+1);
-	close(fd);
+	fl = open(MainToDecoder, O_WRONLY);
+	write(fl, decoder_text, di+1);
+	close(fl);
     char *MainToFinder = "MainToFinder";
+
 	mkfifo(MainToFinder, 0666);
-	fd = open(MainToFinder, O_WRONLY);
-	write(fd, finder_text, fi+1);
-	close(fd);
+	fl = open(MainToFinder, O_WRONLY);
+	write(fl, finder_text, fi+1);
+	close(fl);
     char *MainToPlacer = "MainToPlacer";
+
 	mkfifo(MainToPlacer, 0666);
-	fd = open(MainToPlacer, O_WRONLY);
-	write(fd, placer_text, pi+1);
-	close(fd);
-    char res[2000];
+	fl = open(MainToPlacer, O_WRONLY);
+	write(fl, placer_text, pi+1);
+	close(fl);
+    char result[2000];
 	char *PlacerToMain = "PlacerToMain";
+
 	mkfifo(PlacerToMain, 0666);
-	fd = open(PlacerToMain, O_RDONLY);
-	read(fd, result, 2000);
+	fl = open(PlacerToMain, O_RDONLY);
+	read(fl, result, 2000);
 
     printf("The final result : %s\n", result);
 
