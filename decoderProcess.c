@@ -6,6 +6,10 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+#define MTD "MainToDecoder"
+#define MTP "MainToPlacer"
+#define MTF "MainToFinder"
+#define DTF "DecoderToFinder"
 
 
 
@@ -15,7 +19,7 @@ int main()
 	char text[1000];
 	int fd1;
 
-	char *MainToDecoder = "MainToDecoder";
+	char *MainToDecoder = MTD;
 	mkfifo(MainToDecoder, 0666);
 	fd1 = open(MainToDecoder, O_RDONLY);
 	read(fd1, text, 1000);
@@ -57,8 +61,10 @@ int main()
 		}
 		i++;
 	}
+
+
 	
-	char *DecoderToFinder = "DecoderToFinder";
+	char *DecoderToFinder = DTF;
 	mkfifo(DecoderToFinder, 0666);
 	fd1= open(DecoderToFinder, O_WRONLY);
 	write(fd1, text, i+1);

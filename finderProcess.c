@@ -6,12 +6,26 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
+
+#define MTD "MainToDecoder"
+#define MTP "MainToPlacer"
+#define MTF "MainToFinder"
+#define DTF "DecoderToFinder"
+#define FTP "FinderToPlacer"
+
+
+
+
+
 int main()
 {
 	//Maintodecoder read
+
+
 	char text[1000];
 	int fd1;
-	char *MainToFinder = "MainToFinder";
+	char *MainToFinder = MTF;
+
 	mkfifo(MainToFinder, 0666);
 	fd1 = open(MainToFinder, O_RDONLY);
 	read(fd1, text, 1000);
@@ -20,7 +34,7 @@ int main()
 
 
 	char decode[1000];
-	char *DecoderToFinder = "DecoderToFinder";
+	char *DecoderToFinder = DTF;
 	mkfifo(DecoderToFinder, 0666);
 	fd1 = open(DecoderToFinder, O_RDONLY);
 	read(fd1, decode, 1000);
@@ -70,10 +84,9 @@ int main()
 
 
 	words[wi] = '\0';
-	
 
+	char *FinderToPlacer = FTP;
 
-	char *FinderToPlacer = "FinderToPlacer";
 	mkfifo(FinderToPlacer, 0666);
 
 	fd1 = open(FinderToPlacer, O_WRONLY);
