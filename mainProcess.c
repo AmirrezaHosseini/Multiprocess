@@ -11,6 +11,13 @@
 #define PLACER "./Placer"
 #define DECODER "./Decoder"
 
+#define MTD "MainToDecoder"
+#define MTP "MainToPlacer"
+#define MTF "MainToFinder"
+#define PTM "PlacerToMain"
+
+
+
 int main(){
 
 
@@ -30,60 +37,96 @@ int main(){
 	char placer_text[1000];
 
 
-    while((c = getc(f)) != '#'){
+    pid_t process_a;
+    pid_t process_b;
+    pid_t process_c;
+
+    int status;
+
+    process_a = fork();
+    if (process_a > 0) {
+        process_b = fork();
+        if (process_b > 0) {
+            process_c = fork();
+        }
+    }
+
+    if (process_a == 0) {
+        //(decoder)
+        char * argv_list[2] = {DECODER, NULL};
+        execv(argv_list[0], argv_list);
+        
+    } else if (process_b == 0) {
+        //finder
+
+        char * argv_list[2] = {FINDER, NULL};
+        execv(argv_list[0], argv_list);
+
+    } else if (process_c == 0) {
+        //(placer)
+
+        char * argv_list[2] = {PLACER, NULL};
+        execv(argv_list[0], argv_list);
+    } else {
+        //parent
+
+        FILE *f = fopen("inputCode.txt", "r");
+	    if(f == NULL){
+		printf("no such a file");
+		return 0;
+	    }
+		while((c = getc(f)) != '#'){
 		if(c != '\n' && c != ' '){
 			decoder_text[di] = c;
 			di++;		
 		}
-	}
-    getc(f);
-	getc(f);
-	getc(f);  // skip ###
+	    }
+	//skip the ###
+	    getc(f);
+	    getc(f);
+	    getc(f);
+	//read text for finder	
+	    while((c = getc(f)) != '#'){
+		  if(c != '\n'){
+			finder_text[fi] = c;
+			fi++;		
+		  } 
+	    }
+	//skip the ###
+	    getc(f);
+	    getc(f);
+	    getc(f);
 
-    while((c = getc(f)) != EOF){
-		placer_text[pi] = c;
-		pi++;		
+	//read text for placer
+
+	    while((c = getc(f)) != EOF){
+		   placer_text[pi] = c;
+		   pi++;		
 		
-	}
-
-    decoder_text[di] = '\0';
-	finder_text[fi] = '\0';
-	placer_text[pi] = '\0';
-
-    if(fork() == 0){
-		char *args[] = {DECODER, NULL};
-		execvp(args[0], args);
-	}
-	if(fork() == 0){
-		char *args[] = {FINDER, NULL};
-		execvp(args[0], args);
-	}
-	if(fork() == 0){
-		char *args[] = {PLACER, NULL};
-		execvp(args[0], args);
-	}
+	    }
+    }
 
     int fl;
-	char *MainToDecoder = "MainToDecoder";
+	char *MainToDecoder = MTD;
 
 	mkfifo(MainToDecoder, 0666);
 	fl = open(MainToDecoder, O_WRONLY);
 	write(fl, decoder_text, di+1);
 	close(fl);
-    char *MainToFinder = "MainToFinder";
+    char *MainToFinder = MTF;
 
 	mkfifo(MainToFinder, 0666);
 	fl = open(MainToFinder, O_WRONLY);
 	write(fl, finder_text, fi+1);
 	close(fl);
-    char *MainToPlacer = "MainToPlacer";
+    char *MainToPlacer = MTP;
 
 	mkfifo(MainToPlacer, 0666);
 	fl = open(MainToPlacer, O_WRONLY);
 	write(fl, placer_text, pi+1);
 	close(fl);
     char result[2000];
-	char *PlacerToMain = "PlacerToMain";
+	char *PlacerToMain = PTM;
 
 	mkfifo(PlacerToMain, 0666);
 	fl = open(PlacerToMain, O_RDONLY);

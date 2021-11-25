@@ -7,58 +7,68 @@
 #include <fcntl.h>
 
 
+#define MTP "MainToPlacer"
+#define MTF "MainToFinder"
+#define DTF "DecoderToFinder"
+#define FTP "FinderToPlacer"
+#define PTM "PlacerToMain"
+
 
 
 int main()
 {
-	// read from fifo
+	
+
 	char text[1000];
 	int fd;
-	char *MainToPlacer = "MainToPlacer";
+	char *MainToPlacer = MTP;
 	mkfifo(MainToPlacer, 0666);
 	fd = open(MainToPlacer, O_RDONLY);
 	read(fd, text, 1000);
 	
-	// read the words from placer
+	
+
 	char words[1000];
-	char *FinderToPlacer = "FinderToPlacer";
+	char *FinderToPlacer = FTP;
 	mkfifo(FinderToPlacer, 0666);
 	fd = open(FinderToPlacer, O_RDONLY);
 	read(fd, words, 1000);
 	
-	//printf("from placer i got text from main : %s\n", text);
-	//printf("from placer i got words from finder : %s\n", words);
-	//place the words
-	char ans[2000];
+
+
+	char answer[2000];
 	int n = 0;	
 	int j = 0;
 	for(int i = 0; text[i] != '\0'; i++){
 		
 		if(text[i] == '$'){
 			while(words[j] != ' '){
-				ans[n] = words[j];
+				answer[n] = words[j];
 				n++;
 				j++;
 			}
 			j++;
 		}
 		else{
-			ans[n] = text[i];
+			answer[n] = text[i];
 			n++;
 		}
 	}
 	
-	ans[n] = '\0';
-	//printf("from placer ans : %s\n", ans);
-	// send the result to MainProcessor
-	char *PlacerToMain = "PlacerToMain";
+	answer[n] = '\0';
+	
+	// send result to Main
+
+
+	char *PlacerToMain = PTM;
 	mkfifo(PlacerToMain, 0666);
 	fd = open(PlacerToMain, O_WRONLY);
-	write(fd, ans, n+1);
+	write(fd, answer, n+1);
 	close(fd);
-	
-	//write to file
+
+	// file
+
 	FILE *f = fopen("placer.txt", "w");
-	fprintf(f, "%s", ans);
+	fprintf(f, "%s", answer);
 
 }
